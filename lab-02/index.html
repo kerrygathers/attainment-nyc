@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Attainment NYC</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" />
+    <!-- Add Font Awesome-->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <!-- Add Google Font -->
+    <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700" rel="stylesheet">
+
+    <style>
+        body {
+            background: #060606;
+            font-family: 'Nanum Gothic', sans-serif;
+            color: #F8F8F8;
+        }
+
+        .title {
+            margin: 0px 0px 8px 0px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+        }
+
+        .container {
+            width: 100%;
+            margin-top: 3rem;
+        }
+
+        .row {
+            width: 100%;
+        }
+
+        #map {
+            border: 2px solid #F8F8F8;
+            height: 540px;
+            margin-bottom: 36px;
+        }
+
+        .leaflet-tooltip {
+            min-width: 140px;
+            font-family: 'Nanum Gothic', sans-serif;
+            font-size: 15px;
+            white-space: normal;
+        }
+
+        .boro-label {
+            font-size: 12px;
+        }
+
+        #legend {
+            padding: 6px 8px;
+            font-size: 15px;
+            font-family: 'Nanum Gothic', sans-serif;
+            color: #101010;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            max-width: 210px;
+        }
+
+        .legend-title {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        #legend span {
+            width: 20px;
+            height: 20px;
+            float: left;
+            margin: 0 10px 4px 0;
+        }
+
+        #legend label {
+            font-size: 15px;
+        }
+
+        #legend label:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+
+        .drop-down {
+            font-family: 'Nanum Gothic', sans-serif;
+            color: #F8F8F8;
+            font-size: 15px;
+            font-weight: 400;
+        }
+
+        a {
+            color: #fd8d3c;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #fd8d3c;
+            text-decoration: underline;
+        }
+
+        footer {
+            color: #F8F8F8;
+            text-align: center;
+        }
+
+        footer a {
+            color: #F8F8F8;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #F8F8F8;
+            text-decoration: none;
+        }
+
+        .byline {
+            margin-bottom: 4px;
+        }
+
+        .dcp-logo {
+            margin-top: 10px;
+        }
+
+        .source-box {
+            padding-left: 30px;
+            border-left: 2px solid #F8F8F8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="twelve columns">
+                <h1 class="title">Educational Attainment in NYC</h1>
+                <h5 class="subtitle">Highest Level of Education Completed Among Adults 25 Years and Over<br>by Neighborhood Tabulation Area, 2012-2016</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div id='map' class="twelve columns"></div>
+        </div>
+        <section class="row">
+            <div class="nine columns">
+                <p>New York City, as it is <a href="https://www.nytimes.com/2014/09/18/nyregion/gap-between-manhattans-rich-and-poor-is-greatest-in-us-census-finds.html" target="_blank">frequently</a> <a href="https://ny.curbed.com/2017/4/21/15383988/nyc-independent-budget-office-income-disparity" target="_blank">shown</a>, is a place of extreme inequality. While this inequality is typically discussed in terms of income, it shows up in myriad other social conditions. This map explores <a href="https://www.census.gov/topics/education/educational-attainment/about.html" target="_blank">educational attainment</a> levels in NYC, where neighborhoods in which 8 in 10 adults have finished college are a short train ride from areas where over a quarter of adults have less than a 9th grade education.
+                </p>
+                <p><a href="http://www1.nyc.gov/site/planning/data-maps/open-data/dwn-nynta.page" target="_blank">Neighborhood Tabulation Areas</a> (NTAs) are groups of census tracts that roughly align to commonly understood neighborhoods or combinations of neighboorhoods. They were designed by the NYC Department of City Planning in order to conduct small area population projections. Airports, large parks and cemeteries, and other unpopulated areas are omitted from this map.</p>
+            </div>
+            <div class="three columns u-pull-right source-box">
+                <p><small>Data from the American Community Survey 2012-2016 5-Year Estimates, prepared and published by</small><br>
+                    <a href="http://www1.nyc.gov/site/planning/data-maps/nyc-population/american-community-survey.page" target="_blank"><img src="images/dcp-logo-white.png" alt="NYC Department of City Planning" width="60%" class="dcp-logo"></a></p>
+            </div>
+        </section>
+    </div>
+
+    <footer class="container">
+        <div class="row">
+            <div class="two-half column">
+                <p class="byline">Map by Kerry Gathers</p>
+                <p>
+                    <nobr><i class="fa fa-twitter mr-2"></i>&nbsp;<a class="contact" href="https://twitter.com/KerryGathers" target="_blank">@kerrygathers&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;</a></nobr>
+                    <nobr><i class="fa fa-github mr-2"></i>&nbsp;<a class="contact" href="https://github.com/kerrygathers" target="_blank">kerrygathers&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;</a></nobr>
+                    <nobr><i class="fa fa-envelope mr-2"></i>&nbsp;<a class="contact" href="mailto:kerry.gathers@gmail.com" target="_blank">kerry.gathers@gmail.com</a></nobr>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- legend div is selected by the JS and dynamically added to the map -->
+    <div id="legend"></div>
+
+    <!-- ui-controls div is selected by the JS and dynamically added to the map -->
+    <div id="ui-controls">
+        <label class="drop-down">Select educational attainment:</label>
+        <select id="education">
+            <!-- use optgroup tag to separate categories of options -->
+            <optgroup label="Specific attainment levels">
+            <option value="LESS_NINTH" selected>Less than 9th grade</option>
+            <option value="SOME_HS">9th to 12th grade, no diploma</option>
+            <option value="HS_GRAD">High school graduate (or equivalency)</option>
+            <option value="SOME_COLLEGE">Some college (no degree)</option>
+            <option value="ASSOC_DEG">Associate's degree</option>
+            <option value="BACH_DEG">Bachelor's degree</option>
+            <option value="GRAD_PROF">Graduate or professional degree</option>
+            <optgroup label="Aggregated categories">
+            <option value="LESS_HS_GRAD">Less than a high school graduate</option>
+            <option value="BACH_HIGHER">Bachelor's degree or higher</option>
+        </select>
+    </div>
+    <!-- end ui-controls -->
+
+    <script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/simple-statistics@5.2.1/dist/simple-statistics.min.js"></script>
+
+    <script>
+        // initial map options, disabling pan/zoom
+        var options = {
+            scrollWheelZoom: false,
+            zoomSnap: .1,
+            dragging: true,
+            zoomControl: true
+        }
+
+        // create Leaflet map and apply options
+        var map = L.map('map', options);
+
+        // Move zoom control to bottom left
+        map.zoomControl.setPosition('bottomleft');
+
+        var tiles = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        });
+
+        tiles.addTo(map);
+
+
+        // set global variables for map layer,
+        var attributeValue = "LESS_NINTH",
+            normValue = "POP_25PLUS";
+
+        // create object to hold legend titles
+        var labels = {
+            "LESS_NINTH": "Less than 9th grade",
+            "SOME_HS": "9th to 12th grade, no diploma",
+            "HS_GRAD": "High school graduate (or equivalency)",
+            "SOME_COLLEGE": "Some college (no degree)",
+            "ASSOC_DEG": "Associate's degree",
+            "BACH_DEG": "Bachelor's degree",
+            "GRAD_PROF": "Graduate or professional degree",
+            "LESS_HS_GRAD": "Less than a high school graduate",
+            "BACH_HIGHER": "Bachelor's degree or higher"
+        }
+
+        // AJAX call to load county-level data
+        $.getJSON("data/nyc-education-nta.json", function(data) {
+
+            drawMap(data); // draw the map using GeoJSON data
+
+        });
+
+        function drawMap(data) {
+
+            // create Leaflet data layer and add to map
+            var dataLayer = L.geoJson(data, {
+                style: function(feature) {
+                    // style NTAs with initial default path options
+                    return {
+                        color: '#dddddd',
+                        weight: .9,
+                        fillOpacity: .8,
+                        fillColor: '#1f78b4'
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+
+                    // when mousing over a layer
+                    layer.on('mouseover', function() {
+
+                        // emphasize stroke on mouseover
+                        layer.setStyle({
+                            color: '#fded3c',
+                            weight: 1.5
+                        }).bringToFront();
+                    });
+
+                    // return stroke to normal on mouseout
+                    layer.on('mouseout', function() {
+
+                        // reset the layer style to its original stroke
+                        layer.setStyle({
+                            color: '#dddddd',
+                            weight: .9
+                        });
+                    });
+                }
+
+            }).addTo(map);
+
+
+            // fit the map's bounds and zoom level using the dataLayer extent
+            map.fitBounds(dataLayer.getBounds(), {
+                paddingTopLeft: [25, 25] // push off top left for sake of legend
+            });
+
+            addUi(dataLayer); // add the UI controls 
+            updateMap(dataLayer); // update map with current data attribute
+
+        }
+
+        function updateMap(dataLayer) {
+
+            // get the class breaks for the current data attribute
+            var breaks = getClassBreaks(dataLayer);
+
+            addLegend(breaks); // add the legend to the map using breaks
+
+            // loop through each county layer to update the color and tooltip info
+            dataLayer.eachLayer(function(layer) {
+
+                var props = layer.feature.properties;
+
+                // set the fill color of layer based on its normalized data value
+                layer.setStyle({
+                    fillColor: getColor(props[attributeValue] /
+                        props[normValue], breaks)
+                });
+
+                // build tooltip string
+                var tooltipInfo = "<b>" + props["NTAName"] +
+                    "</b><br>" + "<span class='boro-label'>" + props["Borough"].toUpperCase() + "</span></br>" +
+                    ((props[attributeValue] / props[normValue]) * 100).toFixed(1) + "%";
+
+                // bind a tooltip to layer with county-specific information
+                layer.bindTooltip(tooltipInfo, {
+                    // sticky property so tooltip follows the mouse
+                    sticky: true,
+                    tooltipAnchor: [200, 200]
+                });
+
+            });
+
+            // call updateLegend function
+            updateLegend(breaks);
+        }
+
+        function getClassBreaks(dataLayer) {
+
+            // create empty Array for storing values
+            var values = [];
+
+            // loop through all the counties
+            dataLayer.eachLayer(function(layer) {
+                var value = layer.feature.properties[attributeValue] / layer.feature.properties[normValue];
+                values.push(value); // push the normalized value for each layer into the Array
+            });
+
+            // determine similar clusters
+            var clusters = ss.ckmeans(values, 5);
+
+            // create an array of the lowest value within each cluster
+            var breaks = clusters.map(function(cluster) {
+                return [cluster[0], cluster.pop()];
+            });
+
+            //return array of arrays, e.g., [[0.24,0.25], [0.26, 0.37], etc]
+            return breaks;
+
+        }
+
+        function getColor(d, breaks) {
+            // function accepts a single normalized data attribute value
+            // and uses a series of conditional statements to determine which
+            // which color value to return to return to the function caller
+
+            if (d <= breaks[0][1]) {
+                return '#feedde';
+            } else if (d <= breaks[1][1]) {
+                return '#fdbe85';
+            } else if (d <= breaks[2][1]) {
+                return '#fd8d3c';
+            } else if (d <= breaks[3][1]) {
+                return '#e6550d'
+            } else if (d <= breaks[4][1]) {
+                return '#a63603'
+            }
+
+        }
+
+        function addLegend(breaks) {
+
+            // create a new Leaflet control object, and position it top left
+            var legendControl = L.control({
+                position: 'topleft'
+            });
+
+            // when the legend is added to the map
+            legendControl.onAdd = function(map) {
+
+                // select a div element with an id attribute of legend
+                var legend = L.DomUtil.get('legend');
+
+                // disable scroll and click/touch on map when on legend
+                L.DomEvent.disableScrollPropagation(legend);
+                L.DomEvent.disableClickPropagation(legend);
+
+                // return the selection to the method
+                return legend;
+
+            };
+
+            // add the empty legend div to the map
+            legendControl.addTo(map);
+
+        }
+
+        function updateLegend(breaks) {
+
+            // select the legend, add a title, begin an unordered list and assign to a variable
+            var legend = $('#legend').html("<p class='legend-title'>" + labels[attributeValue] + "</p>");
+
+            // loop through the Array of classification break values
+            for (var i = 0; i <= breaks.length - 1; i++) {
+
+                var color = getColor(breaks[i][0], breaks);
+
+                // describe breaks in legend
+                legend.append(
+                    '<span style="background:' + color + '"></span> ' +
+                    '<label>' + (breaks[i][0] * 100).toFixed(1) + ' &mdash; ' +
+                    (breaks[i][1] * 100).toFixed(1) + '%</label>');
+            }
+        }
+
+        function addUi(dataLayer) {
+            // create the drop down control
+            var selectControl = L.control({
+                position: 'topright'
+            });
+
+            // when control is added
+            selectControl.onAdd = function(map) {
+                // get the element with id attribute of ui-controls
+                return L.DomUtil.get("ui-controls");
+            }
+            // add the control to the map
+            selectControl.addTo(map);
+
+
+            // select attribute dropdown
+            $('select[id="education"]').change(function() {
+                // store reference to currently selected value
+                attributeValue = $(this).val();
+
+                // call updateMap function
+                updateMap(dataLayer);
+
+            });
+        }
+    </script>
+
+</body>
+
+</html>
